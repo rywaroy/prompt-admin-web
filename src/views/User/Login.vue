@@ -3,7 +3,7 @@
         <a-form>
             <a-form-item v-bind="validateInfos.account">
                 <a-input
-                    v-model:value="formState.account" size="large" type="text" placeholder="账号：admin"
+                    v-model:value="formState.account" size="large" type="text" placeholder="账号"
                     allow-clear>
                     <template #prefix>
                         <user-outlined />
@@ -11,7 +11,7 @@
                 </a-input>
             </a-form-item>
             <a-form-item v-bind="validateInfos.password">
-                <a-input-password v-model:value="formState.password" size="large" placeholder="密码：admin" @keydown.enter="login">
+                <a-input-password v-model:value="formState.password" size="large" placeholder="密码" @keydown.enter="login">
                     <template #prefix>
                         <lock-outlined />
                     </template>
@@ -19,7 +19,6 @@
             </a-form-item>
             <a-form-item>
                 <a-checkbox v-model:checked="remember" style="float: left">记住密码</a-checkbox>
-                <a class="forge-password" style="float: right;">忘记密码</a>
             </a-form-item>
             <a-form-item style="margin-top:24px">
                 <a-button

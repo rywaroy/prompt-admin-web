@@ -5,23 +5,23 @@
                 <div class="top">
                     <div class="header">
                         <a href="/">
-                            <span class="title">Antd Pro Vue3</span>
+                            <span class="title">Prompt Library</span>
                         </a>
                     </div>
                     <div class="desc">
-                        Ant Design is the most influential web design specification in Xihu district
+                        <!-- Ant Design is the most influential web design specification in Xihu district -->
                     </div>
                 </div>
 
                 <router-view />
 
-                <div class="footer">
+                <!-- <div class="footer">
                     <div class="links">
                         <a href="_self">帮助</a>
                         <a href="_self">隐私</a>
                         <a href="_self">条款</a>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
