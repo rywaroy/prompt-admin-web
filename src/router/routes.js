@@ -6,7 +6,7 @@ const homeRoute = {
     component: () => import('@/views/Prompt/index.vue'),
     meta: {
         title: 'prompt',
-        icon: 'home',
+        icon: 'prompt',
         keepAlive: true,
     },
     key: 1,
@@ -22,7 +22,7 @@ const routes = [
         component: () => import('@/views/Group/index.vue'),
         meta: {
             title: 'group',
-            icon: 'home',
+            icon: 'group',
             keepAlive: true,
         },
     },
@@ -32,7 +32,7 @@ const routes = [
         component: () => import('@/views/Chat/index.vue'),
         meta: {
             title: 'chat',
-            icon: 'home',
+            icon: 'chat',
             keepAlive: true,
         },
     },

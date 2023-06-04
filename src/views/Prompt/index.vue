@@ -182,8 +182,10 @@ const getGroupList = () => {
     getGroupListApi().then((res) => {
         const data = buildTree(res.data);
         dataSource.value = data;
-        keys.value = [data[0].id];
-        selectGroup(keys.value);
+        if (data.length > 0) {
+            keys.value = [data[0].id];
+            selectGroup(keys.value);
+        }
     });
 };
 

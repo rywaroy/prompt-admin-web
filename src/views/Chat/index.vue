@@ -1,38 +1,32 @@
 <template>
     <div class="chat">
         <div class="out">
-            <div id="chat-c" class="chat-c">
-                <div v-for="(item, index) in chatData" :key="index" class="item-c">
-                    <div v-if="item.type === 'chat'" class="avatar">
-                        <!-- <img :src="chat" alt="chat"> -->
+            <div ref="chatRef" class="chat-content">
+                <template v-if="messageList.length > 0">
+                    <div v-for="(item, index) in messageList" :key="index" class="chat-item">
+                        <div v-if="item.role === 'assistant'" class="avatar">
+                            <div class="chat-icon" />
+                        </div>
+                        <div v-else class="avatar">
+                            {{ name[0] }}
+                        </div>
+                        <div class="text">{{ item.content }}</div>
                     </div>
-                    <div v-else class="avatar">
-                        {{ item.identity }}
-                    </div>
-                    <div :class="{ text: true, error: error }">{{ item.text }}</div>
-                </div>
+                </template>
+                <div v-else class="chat-empty">ChatGPT</div>
             </div>
             <div class="chat-bottom">
-                <div class="chat-bottom-btns">
-                    <button class="btn" @click="regenerateThrottle"><sync-outlined class="icon" /> Regenerate response</button>
-                    <!-- <button class="btn" @click="clear">Clear</button> -->
-                </div>
                 <div class="chat-operation">
                     <textarea
-                        v-model="chatValue"
-                        class="input"
-                        type="text"
-                    />
-                    <!-- <button class="send" @click="sendChatThrottle">
-                        <img :src="send" alt="send">
-                    </button> -->
+                        v-model="prompt" class="input" type="text" :placeholder="promptPlaceholder"
+                        @keydown="promptKeydown" />
                 </div>
             </div>
         </div>
     </div>
 </template>
 <script>
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, nextTick } from 'vue';
 
 export default defineComponent({
     name: 'Chat',
@@ -40,145 +34,155 @@ export default defineComponent({
 </script>
 <script setup>
 import { message } from 'ant-design-vue';
-import { SyncOutlined } from '@ant-design/icons-vue';
+import { storeToRefs } from 'pinia';
+import SSE from '@/utils/sse';
+import useUserStore from '@/stores/user';
 
-import throttle from 'lodash/throttle';
-// import send from './images/send.svg';
-// import chat from './images/chatgpt.png';
+const user = useUserStore();
 
-// import { getChatContent } from '@/api/chat';
+const { name } = storeToRefs(user);
 
-// 聊天数据
-const chatData = ref([
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'chat',
-        type: 'chat',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-    {
-        identity: 'zzh',
-        type: 'user',
-        text: "Hi, I'm GPT-3. I'm a language model trained on a very large dataset of internet text. I can answer questions, generate stories, and even translate between languages. I'm a work in progress, so I'm not perfect yet. But I'm getting better all the time. I'm excited to see what we can do together.",
-    },
-]);
-// 输入内容
-const chatValue = ref('');
-// 重发内容
-const reChatValue = '';
-// error
-const error = ref(false);
+const messageList = ref([]);
+const prompt = ref('');
 const loading = ref(false);
+const chatRef = ref(null);
+let promptPlaceholder = '';
+if (navigator.platform.indexOf('Win') !== -1) {
+    promptPlaceholder = '按下Ctrl+Enter发送消息';
+} else if (navigator.platform.indexOf('Mac') !== -1) {
+    promptPlaceholder = '按下Command+Enter发送消息';
+}
 
-// 发送内容
-function sendChatHandle() {
-    if (chatValue.value === '') {
+let timer;
+let texts = [];
+let source;
+let isEnd = true;
+
+const setCharacter = (text) => {
+    const message = messageList.value[messageList.value.length - 1];
+    if (message.role === 'assistant') {
+        message.content += text;
+    }
+};
+
+const stop = () => {
+    if (timer) {
+        clearInterval(timer);
+    }
+    loading.value = false;
+    isEnd = true;
+    if (texts.length > 0) {
+        setCharacter(texts.join(''));
+    }
+    texts = [];
+    source.close();
+};
+
+const scrollToBottom = (force) => {
+    const listDom = chatRef.value;
+    let isBottom = false;
+    if (listDom.scrollTop + listDom.clientHeight + 10 >= listDom.scrollHeight) {
+        isBottom = true;
+    }
+    nextTick(() => {
+        // 判断是否在底部
+        if (isBottom || force) {
+            listDom.scrollTop = listDom.scrollHeight;
+        }
+    });
+};
+
+const submit = () => {
+    if (loading.value) {
+        return;
+    }
+    if (prompt.value) {
+        messageList.value.push({
+            role: 'user',
+            content: prompt.value,
+            html: prompt.value,
+        });
+    } else if (messageList.value.length === 0) {
         message.error('请输入内容');
         return;
     }
-    sendChat(chatValue.value);
-}
-
-const sendChatThrottle = throttle(sendChatHandle, 1000);
-
-async function sendChat(value) {
-    chatData.value.push({ identity: '', text: value });
-    loading.value = true;
-
-    // // 发送请求
-    // const res = await getChatContent({
-    //     conversationId: '',
-    //     text: value,
-    // });
-
-    // error.value = res.code !== 200;
-
-    // loading.value = false;
-    // chatData.value.push({ identity: 'chat', text: res.message });
-    // nextTick(() => {
-    //     const element = document.getElementById('chat-c');
-    //     element.scrollTop = element.scrollHeight;
-    // });
-    // reChatValue = value;
-    // chatValue.value = '';
-}
-
-// 清除输入内容
-function reset() {
-    chatValue.value = '';
-}
-
-// 重新发送请求
-function regenerate() {
-    if (reChatValue === '') {
-        return;
+    if (messageList.value[messageList.value.length - 1].role !== 'assistant') {
+        messageList.value.push({
+            role: 'assistant',
+            content: '',
+            html: '',
+        });
     }
-    sendChat(reChatValue);
-}
-const regenerateThrottle = throttle(regenerate, 1000);
+    scrollToBottom(true);
+    const params = {
+        messages: messageList.value.filter((item) => item.content).map((item) => ({ role: item.role, content: item.content })),
+    };
+    prompt.value = '';
+    isEnd = false;
+    timer = setInterval(() => {
+        if (texts.length > 0) {
+            let text = '';
+            if (texts.length > 50) {
+                text = texts.splice(0, 25).join('');
+            } else if (texts.length > 25) {
+                text = texts.splice(0, 10).join('');
+            } else if (texts.length > 10) {
+                text = texts.splice(0, 3).join('');
+            } else {
+                text = texts.shift();
+            }
+            setCharacter(text);
+            scrollToBottom();
+        } else if (isEnd) {
+            loading.value = false;
+            clearInterval(timer);
+        }
+    }, 60);
 
-// 清除聊天内容
-function clear() {
-    chatData.value = [];
-}
+    source = new SSE('/api/chat', {
+        headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json',
+        },
+        payload: JSON.stringify(params),
+        method: 'POST',
+    });
+    source.addEventListener('message', (event) => {
+        const value = event.data;
+        for (let i = 0; i < value.length; i++) {
+            if (value[i] === '[DONE]') {
+                isEnd = true;
+                source.close();
+                return;
+            }
+            const { choices } = JSON.parse(value[i]);
+            choices.forEach((item) => {
+                if (item.delta.content) {
+                    texts.push(item.delta.content);
+                }
+            });
+        }
+    }, false);
+    source.addEventListener('err', (err) => {
+        stop();
+    }, false);
+    source.addEventListener('error', (err) => {
+        stop();
+    });
+    loading.value = true;
+    source.stream();
+};
+
+const promptKeydown = (e) => {
+    // ctrl + entry 提交，command + entry 提交，shift + entry 换行
+    if (e.keyCode === 13) {
+        if (e.ctrlKey || e.metaKey) {
+            submit();
+        } else if (e.shiftKey) {
+            // prompt.value += '\n';
+        }
+    }
+};
+
 </script>
 <style scoped src="./index.css"></style>
