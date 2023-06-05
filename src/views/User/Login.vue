@@ -39,6 +39,7 @@ import { reactive, ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { UserOutlined, LockOutlined } from '@ant-design/icons-vue';
 import { Form } from 'ant-design-vue';
+import useUserStore from '@/stores/user';
 import { loginApi } from '@/services/user';
 
 const router = useRouter();
@@ -74,7 +75,13 @@ const login = () => {
         loading.value = true;
         loginApi(values).then((res) => {
             loading.value = false;
-            window.localStorage.setItem('token', res.data.token);
+            const { account, admin, token } = res.data;
+            const user = useUserStore();
+            user.setUserInfo({
+                name: account,
+                permission: admin,
+            });
+            window.localStorage.setItem('token', token);
             if (remember.value) {
                 window.localStorage.setItem('remember', true);
                 window.localStorage.setItem('account', values.account);

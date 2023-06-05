@@ -7,6 +7,7 @@
             </div>
         </a-dropdown>
     </div>
+    <div v-else class="right-content-login"><a href="/#/user/login">Sign in</a></div>
 </template>
 <script>
 import { defineComponent } from 'vue';
@@ -58,5 +59,9 @@ const loginout = () => {
     width: 24px;
     height: 24px;
     margin-right: 8px;
+}
+
+.right-content-login a {
+    color: #fff;
 }
 </style>

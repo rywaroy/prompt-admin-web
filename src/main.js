@@ -7,6 +7,7 @@ import PageContainer from './components/PageContainer/index.vue';
 import SvgIcon from './components/SvgIcon/index.vue';
 import 'ant-design-vue/dist/antd.css';
 import './assets/styles/global.less';
+import 'highlight.js/styles/atom-one-dark.css';
 
 const app = createApp(App);
 

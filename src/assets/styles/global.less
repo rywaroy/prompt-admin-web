@@ -23,7 +23,7 @@ body {
         vertical-align: middle;
       }
 
-      > .ant-form-item-label {
+      >.ant-form-item-label {
         width: auto;
         padding-right: 8px;
         line-height: 32px;
@@ -101,4 +101,59 @@ body {
   &::-webkit-scrollbar-thumb:hover {
     background-color: rgb(144 147 153 / 50%);
   }
+}
+
+.code-block-wrapper {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.code-header {
+  margin: 0;
+  background-color: #333;
+  color: white;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 40px;
+}
+
+.code-block {
+  box-sizing: border-box;
+  padding: 12px;
+  max-width: 100%;
+  overflow: auto;
+  margin: 0;
+  font-size: 16px;
+}
+
+.rendering .code-block-wrapper div.copy-action {
+  display: none;
+}
+
+.code-block-wrapper .code-lang {
+  margin-left: 6px;
+  padding: 2px;
+}
+
+.code-block-wrapper div.copy-action {
+  margin-right: 6px;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.code-block-wrapper div.copy-action {
+  background-color: rgba(144, 202, 249, 0.16);
+  padding: 2px 4px;
+}
+
+.code-block-wrapper div.copy-action:hover {
+  background-color: rgba(144, 202, 249, 0.36);
+}
+
+.code-block-wrapper:hover div.copy-action {
+  opacity: 1;
 }

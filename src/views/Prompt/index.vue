@@ -22,25 +22,34 @@
                 <div v-if="currentPrompt.id" class="prompt-list">
                     <div v-for="(item, index) in currentPrompt.fragments" :key="item.id" class="prompt-item">
                         <check-circle-outlined class="prompt-checked" :class="{ active: item.selected }" @click="selectFragment(index)" />
-                        <a-textarea v-model:value="item.content" :auto-size="{ minRows: 1 }" class="prompt-text" />
+                        <a-textarea v-model:value="item.content" :auto-size="{ minRows: 1, maxRows: 10 }" class="prompt-text" />
                         <plus-outlined class="prompt-plus" @click="addFragment(index)" />
                         <minus-outlined class="prompt-minus" @click="deleteFragment(index)" />
                     </div>
-                    <a-button type="primary" @click="addFragment()">添加</a-button>
+                    <a-button class="prompt-btn" type="primary" @click="addFragment()">添加</a-button>
+                    <a-button class="prompt-btn" type="primary" @click="preview()">预览</a-button>
+                    <a-button class="prompt-btn" type="primary" @click="submit()">提交</a-button>
                 </div>
-            </div>
-            <div class="prompt-result">
-                {{ promptText }}
             </div>
         </div>
         <UpdatePrompt
             v-model:visible="updateVisible"
             :form-state="formState"
             @submit="updatePrompt" />
+
+        <a-modal
+            v-model:visible="previewVisible"
+            title="预览"
+            :footer="null"
+            :width="800"
+            :body-style="{ height: 'calc(100vh - 200px)', overflow: 'auto' }">
+            <div class="prompt-result">{{ promptText }}</div>
+        </a-modal>
     </page-container>
 </template>
 <script>
 import { defineComponent, ref, reactive, onMounted, computed } from 'vue';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
     name: 'Group',
@@ -54,6 +63,8 @@ import { getPromptListApi, getPromptDetailApi, updatePromptApi, createPromptApi,
 import { buildTree } from '@/utils';
 import UpdatePrompt from './components/UpdatePrompt/index.vue';
 
+const router = useRouter();
+
 let groupId;
 const dataSource = ref([]);
 const promptList = ref([]);
@@ -62,6 +73,7 @@ const currentPrompt = ref({});
 const keys = ref([]);
 const updateVisible = ref(false);
 const formState = reactive({});
+const previewVisible = ref(false);
 
 const promptText = computed(() => {
     if (!currentPrompt.value.fragments) {
@@ -187,6 +199,15 @@ const getGroupList = () => {
             selectGroup(keys.value);
         }
     });
+};
+
+const preview = () => {
+    previewVisible.value = true;
+};
+
+const submit = () => {
+    window.localStorage.setItem('prompt', promptText.value);
+    router.push('/chat');
 };
 
 onMounted(() => {

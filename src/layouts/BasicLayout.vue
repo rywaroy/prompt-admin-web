@@ -99,6 +99,7 @@ provide('reload', reload);
     :deep(.ant-layout-sider-children) {
         display: flex;
         flex-direction: column;
+        box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
     }
 }
 

@@ -10,7 +10,7 @@
                         <div v-else class="avatar">
                             {{ name[0] }}
                         </div>
-                        <div class="text">{{ item.content }}</div>
+                        <div class="chat-text" :class="{ user: item.role === 'user' }" v-html="item.html" />
                     </div>
                 </template>
                 <div v-else class="chat-empty">ChatGPT</div>
@@ -26,7 +26,7 @@
     </div>
 </template>
 <script>
-import { defineComponent, ref, nextTick } from 'vue';
+import { defineComponent, ref, nextTick, onUnmounted, onActivated, onDeactivated } from 'vue';
 
 export default defineComponent({
     name: 'Chat',
@@ -34,11 +34,17 @@ export default defineComponent({
 </script>
 <script setup>
 import { message } from 'ant-design-vue';
+import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
+import escape from 'lodash/escape';
+import MarkdownIt from 'markdown-it';
+import mila from 'markdown-it-link-attributes';
+import hljs from 'highlight.js';
 import SSE from '@/utils/sse';
 import useUserStore from '@/stores/user';
 
 const user = useUserStore();
+const route = useRoute();
 
 const { name } = storeToRefs(user);
 
@@ -48,20 +54,50 @@ const loading = ref(false);
 const chatRef = ref(null);
 let promptPlaceholder = '';
 if (navigator.platform.indexOf('Win') !== -1) {
-    promptPlaceholder = '按下Ctrl+Enter发送消息';
+    promptPlaceholder = '按下 Ctrl + Enter 发送消息';
 } else if (navigator.platform.indexOf('Mac') !== -1) {
-    promptPlaceholder = '按下Command+Enter发送消息';
+    promptPlaceholder = '按下 Command + Enter 发送消息';
 }
 
 let timer;
 let texts = [];
 let source;
 let isEnd = true;
+const md = new MarkdownIt({
+    linkify: true,
+    breaks: true,
+    highlight: (str, lang, attrs) => {
+        let content = str;
+        if (lang && hljs.getLanguage(lang)) {
+            try {
+                content = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
+            } catch (e) {
+                console.log(e);
+                return str;
+            }
+        } else {
+            content = md.utils.escapeHtml(str);
+        }
+
+        // join actions html string
+        lang = (lang || 'txt').toUpperCase();
+        return [
+            '<div class="code-block-wrapper">',
+            `<div class="code-header"><span class="code-lang">${lang}</span><div class="copy-action">copy</div></div>`,
+            '<pre class="hljs code-block">',
+            `<code>${content}</code>`,
+            '</pre>',
+            '</div>',
+        ].join('');
+    },
+});
+md.use(mila, { attrs: { target: '_blank', rel: 'noopener' } });
 
 const setCharacter = (text) => {
     const message = messageList.value[messageList.value.length - 1];
     if (message.role === 'assistant') {
         message.content += text;
+        message.html = md.render(message.content);
     }
 };
 
@@ -75,7 +111,9 @@ const stop = () => {
         setCharacter(texts.join(''));
     }
     texts = [];
-    source.close();
+    if (source) {
+        source.close();
+    }
 };
 
 const scrollToBottom = (force) => {
@@ -100,7 +138,7 @@ const submit = () => {
         messageList.value.push({
             role: 'user',
             content: prompt.value,
-            html: prompt.value,
+            html: escape(prompt.value),
         });
     } else if (messageList.value.length === 0) {
         message.error('请输入内容');
@@ -174,15 +212,30 @@ const submit = () => {
 };
 
 const promptKeydown = (e) => {
-    // ctrl + entry 提交，command + entry 提交，shift + entry 换行
     if (e.keyCode === 13) {
         if (e.ctrlKey || e.metaKey) {
             submit();
-        } else if (e.shiftKey) {
-            // prompt.value += '\n';
         }
     }
 };
+
+onActivated(() => {
+    const promptText = window.localStorage.getItem('prompt');
+    if (promptText) {
+        prompt.value = promptText;
+        messageList.value = [];
+        submit();
+        window.localStorage.removeItem('prompt');
+    }
+});
+
+onDeactivated(() => {
+    stop();
+});
+
+onUnmounted(() => {
+    stop();
+});
 
 </script>
 <style scoped src="./index.css"></style>
