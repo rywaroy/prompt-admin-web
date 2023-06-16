@@ -1,24 +1,24 @@
 <template>
-    <div class="chat">
-        <div class="out">
-            <div ref="chatRef" class="chat-content">
+    <div class="overflow-y-hidden overflow-x-auto" style="height: calc(100vh - 110px);">
+        <div class="h-full min-w-[1000px] flex flex-col bg-white relative">
+            <div ref="chatRef" class="chat-content flex-1 overflow-y-auto pb-[124px]">
                 <template v-if="messageList.length > 0">
-                    <div v-for="(item, index) in messageList" :key="index" class="chat-item">
+                    <div v-for="(item, index) in messageList" :key="index" class="py-6 flex justify-center" :class="{'bg-gray-100': item.role === 'assistant' }">
                         <div v-if="item.role === 'assistant'" class="avatar">
-                            <div class="chat-icon" />
+                            <div class="chat-icon w-full h-full" />
                         </div>
                         <div v-else class="avatar">
                             {{ name[0] }}
                         </div>
-                        <div class="chat-text" :class="{ user: item.role === 'user' }" v-html="item.html" />
+                        <div class="w-[750px] text-base" :class="{ '': item.role === 'user' }" v-html="item.html" />
                     </div>
                 </template>
-                <div v-else class="chat-empty">ChatGPT</div>
+                <div v-else class="h-full flex items-center justify-center text-5xl font-bold text-gray-400">ChatGPT</div>
             </div>
-            <div class="chat-bottom">
-                <div class="chat-operation">
+            <div class="chat-bottom bg-transparent backdrop-blur-sm flex flex-col justify-center items-center py-6 absolute w-full left-0 bottom-0">
+                <div class="p-3 w-[768px] relative shadow-lg border border-gray-100 rounded-lg overflow-hidden bg-white">
                     <textarea
-                        v-model="prompt" class="input" type="text" :placeholder="promptPlaceholder"
+                        v-model="prompt" class="chat-operation-input" type="text" :placeholder="promptPlaceholder"
                         @keydown="promptKeydown" />
                 </div>
             </div>
@@ -44,7 +44,6 @@ import SSE from '@/utils/sse';
 import useUserStore from '@/stores/user';
 
 const user = useUserStore();
-const route = useRoute();
 
 const { name } = storeToRefs(user);
 
@@ -72,7 +71,6 @@ const md = new MarkdownIt({
             try {
                 content = hljs.highlight(str, { language: lang, ignoreIllegals: true }).value;
             } catch (e) {
-                console.log(e);
                 return str;
             }
         } else {

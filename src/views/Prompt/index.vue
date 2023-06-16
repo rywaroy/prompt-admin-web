@@ -1,7 +1,7 @@
 <template>
     <page-container>
-        <div class="prompt-container">
-            <div class="prompt-group">
+        <div class="flex p-3 bg-white">
+            <div class="w-[450px]">
                 <a-tree
                     v-model:selectedKeys="keys"
                     :tree-data="dataSource"
@@ -9,26 +9,26 @@
                     @select="selectGroup"
                 />
             </div>
-            <div class="prompt-content">
-                <div class="prompt-content-top">
-                    <a-select v-model:value="currentPromptId" class="prompt-content-name" @change="selectPrompt">
+            <div class="flex-1">
+                <div class="mb-5">
+                    <a-select v-model:value="currentPromptId" class="w-[300px] mr-2" @change="selectPrompt">
                         <a-select-option v-for="item in promptList" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
                     </a-select>
-                    <plus-outlined class="prompt-icon-add" @click="addPrompt" />
-                    <edit-outlined class="prompt-icon-edit" @click="editPrompt" />
-                    <save-outlined class="prompt-icon-save" @click="savePrompt" />
-                    <delete-outlined class="prompt-icon-delete" @click="deletePrompt" />
+                    <plus-outlined class="text-base mr-2 text-primary" @click="addPrompt" />
+                    <edit-outlined class="text-base mr-2 text-amber-600" @click="editPrompt" />
+                    <save-outlined class="text-base mr-2 text-green-500" @click="savePrompt" />
+                    <delete-outlined class="text-base mr-2 text-rose-500" @click="deletePrompt" />
                 </div>
-                <div v-if="currentPrompt.id" class="prompt-list">
-                    <div v-for="(item, index) in currentPrompt.fragments" :key="item.id" class="prompt-item">
-                        <check-circle-outlined class="prompt-checked" :class="{ active: item.selected }" @click="selectFragment(index)" />
-                        <a-textarea v-model:value="item.content" :auto-size="{ minRows: 1, maxRows: 10 }" class="prompt-text" />
-                        <plus-outlined class="prompt-plus" @click="addFragment(index)" />
-                        <minus-outlined class="prompt-minus" @click="deleteFragment(index)" />
+                <div v-if="currentPrompt.id">
+                    <div v-for="(item, index) in currentPrompt.fragments" :key="item.id" class="flex mb-2 w-full">
+                        <check-circle-outlined :class="{ 'active': item.selected }" class="prompt-checked text-2xl text-gray-400 mr-2 mt-1 cursor-pointer" @click="selectFragment(index)" />
+                        <a-textarea v-model:value="item.content" :auto-size="{ minRows: 1, maxRows: 10 }" />
+                        <plus-outlined class="text-xl text-primary mt-2 ml-2 cursor-pointer" @click="addFragment(index)" />
+                        <minus-outlined class="text-xl text-rose-500 mt-2 ml-2 cursor-pointer" @click="deleteFragment(index)" />
                     </div>
-                    <a-button class="prompt-btn" type="primary" @click="addFragment()">添加</a-button>
-                    <a-button class="prompt-btn" type="primary" @click="preview()">预览</a-button>
-                    <a-button class="prompt-btn" type="primary" @click="submit()">提交</a-button>
+                    <a-button class="mr-2" type="primary" @click="addFragment()">添加</a-button>
+                    <a-button class="mr-2" type="primary" @click="preview()">预览</a-button>
+                    <a-button class="mr-2" type="primary" @click="submit()">提交</a-button>
                 </div>
             </div>
         </div>
@@ -43,7 +43,7 @@
             :footer="null"
             :width="800"
             :body-style="{ height: 'calc(100vh - 200px)', overflow: 'auto' }">
-            <div class="prompt-result">{{ promptText }}</div>
+            <div class="whitespace-pre-wrap rounded-lg border border-gray-300 p-3 ml-5">{{ promptText }}</div>
         </a-modal>
     </page-container>
 </template>
@@ -215,4 +215,8 @@ onMounted(() => {
 });
 
 </script>
-<style scoped src="./index.less" lang="less"></style>
+<style scoped lang="less">
+.prompt-checked.active {
+    color: #52c41a;
+}
+</style>
