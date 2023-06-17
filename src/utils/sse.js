@@ -178,18 +178,11 @@ const SSE = function (url, options) {
         if (this.xhr.readyState === XMLHttpRequest.DONE) {
             try {
                 const data = JSON.parse(this.xhr.responseText);
-                console.log(data);
-                // const { code } = data;
-                // if (code !== '10000') {
-                //     if (code === '10101' || code === '10102') {
-                //         getLoginUrl().then((res) => {
-                //             // window.location.href = res.data;
-                //             window.open(res.data);
-                //         });
-                //     }
-                //     message.error(data.message);
-                //     this.listeners.err && this.listeners.err.forEach((cb) => cb(data));
-                // }
+                const { code, message: msg } = data;
+                if (code !== '200') {
+                    message.error(msg);
+                    this.listeners.err && this.listeners.err.forEach((cb) => cb(data));
+                }
             } catch {
                 this.listeners.err && this.listeners.err.forEach((cb) => cb());
             }
