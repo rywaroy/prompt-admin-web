@@ -2,12 +2,23 @@
     <page-container>
         <div class="flex p-3 bg-white">
             <div class="w-[450px]">
+                <a-input v-model:value="searchValue" class="mb-4 w-[300px]" placeholder="Search" />
                 <a-tree
                     v-model:selectedKeys="keys"
+                    :expanded-keys="expandedKeys"
                     :tree-data="dataSource"
+                    :auto-expand-parent="autoExpandParent"
                     :field-names="{ children: 'children', title: 'name', key: 'id' }"
                     @select="selectGroup"
-                />
+                    @expand="onExpand"
+                >
+                    <template #title="{ name }">
+                        <span v-if="name.toLocaleLowerCase().indexOf(searchValue.toLocaleLowerCase()) > -1">
+                            {{ name.substr(0, name.toLocaleLowerCase().indexOf(searchValue.toLocaleLowerCase())) }}<span class="text-rose-500">{{ name.substr(name.toLocaleLowerCase().indexOf(searchValue.toLocaleLowerCase()), searchValue.length) }}</span>{{ name.substr(name.toLocaleLowerCase().indexOf(searchValue.toLocaleLowerCase()) + searchValue.length) }}
+                        </span>
+                        <span v-else>{{ name }}</span>
+                    </template>
+                </a-tree>
             </div>
             <div class="flex-1">
                 <div class="mb-5">
@@ -49,7 +60,7 @@
     </page-container>
 </template>
 <script>
-import { defineComponent, ref, reactive, onMounted, computed } from 'vue';
+import { defineComponent, ref, reactive, onMounted, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 export default defineComponent({
@@ -75,6 +86,10 @@ const keys = ref([]);
 const updateVisible = ref(false);
 const formState = reactive({});
 const previewVisible = ref(false);
+const searchValue = ref('');
+const expandedKeys = ref([]);
+const autoExpandParent = ref(true);
+let dataList = [];
 
 const promptText = computed(() => {
     if (!currentPrompt.value.fragments) {
@@ -82,6 +97,38 @@ const promptText = computed(() => {
     }
     return currentPrompt.value.fragments.filter((item) => item.selected).map((item) => item.content).join('\n');
 });
+
+const getParentKey = (key, tree) => {
+    let parentKey;
+    for (let i = 0; i < tree.length; i++) {
+        const node = tree[i];
+        if (node.children) {
+            if (node.children.some((item) => item.id === key)) {
+                parentKey = node.id;
+            } else if (getParentKey(key, node.children)) {
+                parentKey = getParentKey(key, node.children);
+            }
+        }
+    }
+    return parentKey;
+};
+
+watch(searchValue, (value) => {
+    const expanded = dataList.map((item) => {
+        if (item.name.toLocaleLowerCase().indexOf(value.toLocaleLowerCase()) > -1) {
+            return getParentKey(item.id, dataSource.value);
+        }
+        return null;
+    }).filter((item, i, self) => item && self.indexOf(item) === i);
+    expandedKeys.value = expanded;
+    searchValue.value = value;
+    autoExpandParent.value = true;
+});
+
+const onExpand = (keys) => {
+    expandedKeys.value = keys;
+    autoExpandParent.value = false;
+};
 
 const selectFragment = (index) => {
     currentPrompt.value.fragments[index].selected = !currentPrompt.value.fragments[index].selected;
@@ -193,6 +240,7 @@ const deletePrompt = () => {
 
 const getGroupList = () => {
     getGroupListApi().then((res) => {
+        dataList = res.data;
         const data = buildTree(res.data);
         dataSource.value = data;
         if (data.length > 0) {
