@@ -18,6 +18,7 @@
                     <edit-outlined class="text-base mr-2 text-amber-600" @click="editPrompt" />
                     <save-outlined class="text-base mr-2 text-green-500" @click="savePrompt" />
                     <delete-outlined class="text-base mr-2 text-rose-500" @click="deletePrompt" />
+                    <copy-outlined class="text-base mr-2 text-yellow-500" @click="copyPrompt" />
                 </div>
                 <div v-if="currentPrompt.id">
                     <div v-for="(item, index) in currentPrompt.fragments" :key="item.id" class="flex mb-2 w-full">
@@ -57,7 +58,7 @@ export default defineComponent({
 </script>
 <script setup>
 import { Modal, message } from 'ant-design-vue';
-import { CheckCircleOutlined, PlusOutlined, MinusOutlined, EditOutlined, DeleteOutlined, SaveOutlined } from '@ant-design/icons-vue';
+import { CheckCircleOutlined, PlusOutlined, MinusOutlined, EditOutlined, DeleteOutlined, SaveOutlined, CopyOutlined } from '@ant-design/icons-vue';
 import { getGroupListApi } from '@/services/group';
 import { getPromptListApi, getPromptDetailApi, updatePromptApi, createPromptApi, deletePromptApi } from '@/services/prompt';
 import { buildTree } from '@/utils';
@@ -208,6 +209,14 @@ const preview = () => {
 const submit = () => {
     window.localStorage.setItem('prompt', promptText.value);
     router.push('/chat');
+};
+
+const copyPrompt = () => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(promptText.value).then(() => {
+            message.success('复制成功');
+        });
+    }
 };
 
 onMounted(() => {
