@@ -128,7 +128,7 @@ const scrollToBottom = (force) => {
     });
 };
 
-const submit = () => {
+const submit = (config = {}) => {
     if (loading.value) {
         return;
     }
@@ -152,6 +152,7 @@ const submit = () => {
     scrollToBottom(true);
     const params = {
         messages: messageList.value.filter((item) => item.content).map((item) => ({ role: item.role, content: item.content })),
+        ...config,
     };
     prompt.value = '';
     isEnd = false;
@@ -222,7 +223,7 @@ onActivated(() => {
     if (promptText) {
         prompt.value = promptText;
         messageList.value = [];
-        submit();
+        submit({ temperature: 0 });
         window.localStorage.removeItem('prompt');
     }
 });
