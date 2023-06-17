@@ -1,14 +1,14 @@
 <template>
-    <a-layout class="basic-layout">
-        <a-layout-header class="basic-layout-header">
-            <div class="basic-layout-header-title">
+    <a-layout class="h-screen overflow-hidden">
+        <a-layout-header class="h-12 px-4 flex justify-between items-center">
+            <div class="font-bold text-lg leading-[48px] text-white">
                 {{ setting.title }}
             </div>
             <right-content />
         </a-layout-header>
         <a-layout>
             <a-layout-sider theme="light" class="basic-sider" :collapsed="collapsed" :collapsed-width="48">
-                <div class="basic-menu scroll-bar">
+                <div class="flex-1 scroll-bar">
                     <base-menu />
                 </div>
                 <div class="basic-menu-fold">
@@ -43,7 +43,6 @@ import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
 import setting from '@/config/defaultSettings';
 import BaseMenu from '@/components/BaseMenu/index.vue';
 import RightContent from '@/components/RightContent/index.vue';
-import BaseFooter from '@/components/BaseFooter/index.vue';
 import BasePageTab from '@/components/BasePageTab/index.vue';
 import usePageTabStore from '@/stores/pageTab';
 
@@ -78,25 +77,6 @@ provide('reload', reload);
 
 </script>
 <style scoped lang="less">
-.basic-layout {
-    height: 100vh;
-    overflow: hidden;
-}
-
-.basic-layout-header {
-    height: 48px;
-    padding: 0 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.basic-layout-header-title {
-    font-weight: 600;
-    font-size: 18px;
-    line-height: 48px;
-    color: #fff;
-}
 
 .basic-sider {
     :deep(.ant-layout-sider-children) {
@@ -104,10 +84,6 @@ provide('reload', reload);
         flex-direction: column;
         box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
     }
-}
-
-.basic-menu {
-    flex: 1;
 }
 
 .basic-menu-fold {
