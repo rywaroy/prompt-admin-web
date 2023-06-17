@@ -18,7 +18,7 @@
                     </div>
                 </div>
             </a-layout-sider>
-            <a-layout-content class="scroll-bar">
+            <a-layout-content ref="container" class="scroll-bar">
                 <base-page-tab />
                 <router-view v-slot="{ Component, route }">
                     <keep-alive :include="include">
@@ -26,6 +26,7 @@
                     </keep-alive>
                 </router-view>
             </a-layout-content>
+            <a-back-top :target="containerTaget" :visibility-height="200" />
         </a-layout>
     </a-layout>
 </template>
@@ -52,8 +53,8 @@ const { tabs, active } = storeToRefs(pageTab);
 const include = computed(() => tabs.value.filter((tab) => tab.meta.keepAlive).map((tab) => tab.name));
 
 const collapsed = ref(false);
-
 const isRouteActive = ref(true);
+const container = ref(null);
 
 const reload = () => {
     isRouteActive.value = false;
@@ -70,6 +71,8 @@ const reload = () => {
         }
     });
 };
+
+const containerTaget = () => container.value.$el;
 
 provide('reload', reload);
 
