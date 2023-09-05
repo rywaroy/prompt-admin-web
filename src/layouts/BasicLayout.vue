@@ -16,6 +16,9 @@
                         <menu-unfold-outlined v-if="collapsed" />
                         <menu-fold-outlined v-else />
                     </div>
+                    <div v-if="user.name && !collapsed" class="setting" @click="showSettingModal = true">
+                        <setting-outlined class="setting-icon" />
+                    </div>
                 </div>
             </a-layout-sider>
             <a-layout-content ref="container" class="scroll-bar">
@@ -28,6 +31,17 @@
             </a-layout-content>
             <a-back-top :target="containerTaget" :visibility-height="200" />
         </a-layout>
+
+        <a-modal v-model:visible="showSettingModal" title="设置" @ok="setModel">
+            <a-form>
+                <a-form-item label="Model">
+                    <a-select v-model:value="model">
+                        <a-select-option value="gpt-3.5-turbo-0613">gpt-3.5-turbo-0613</a-select-option>
+                        <a-select-option value="gpt-4-0613">gpt-4-0613</a-select-option>
+                    </a-select>
+                </a-form-item>
+            </a-form>
+        </a-modal>
     </a-layout>
 </template>
 <script>
@@ -39,12 +53,13 @@ export default defineComponent({
 </script>
 <script setup>
 import { storeToRefs } from 'pinia';
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons-vue';
+import { MenuFoldOutlined, MenuUnfoldOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import setting from '@/config/defaultSettings';
 import BaseMenu from '@/components/BaseMenu/index.vue';
 import RightContent from '@/components/RightContent/index.vue';
 import BasePageTab from '@/components/BasePageTab/index.vue';
 import usePageTabStore from '@/stores/pageTab';
+import useUserStore from '@/stores/user';
 
 const pageTab = usePageTabStore();
 const { tabs, active } = storeToRefs(pageTab);
@@ -73,6 +88,17 @@ const reload = () => {
 
 const containerTaget = () => container.value.$el;
 
+const showSettingModal = ref(false);
+const model = ref(window.localStorage.getItem('model') || '');
+const setModel = () => {
+    if (model.value) {
+        window.localStorage.setItem('model', model.value);
+        showSettingModal.value = false;
+    }
+};
+
+const user = useUserStore();
+
 provide('reload', reload);
 
 </script>
@@ -83,10 +109,13 @@ provide('reload', reload);
         display: flex;
         flex-direction: column;
         box-shadow: 0 1px 4px rgba(0, 21, 41, .08);
+        position: relative;
+        z-index: 10;
     }
 }
 
 .basic-menu-fold {
+    position: relative;
     height: 48px;
     line-height: 48px;
     color: rgba(0, 0, 0, .85);
@@ -100,6 +129,12 @@ provide('reload', reload);
         &:hover {
             color: #1890ff;
         }
+    }
+
+    .setting {
+        position: absolute;
+        right: 10px;
+        top: 0;
     }
 }
 </style>

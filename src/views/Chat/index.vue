@@ -154,6 +154,10 @@ const submit = (config = {}) => {
         messages: messageList.value.filter((item) => item.content).map((item) => ({ role: item.role, content: item.content })),
         ...config,
     };
+    const model = window.localStorage.getItem('model');
+    if (model) {
+        params.model = model;
+    }
     prompt.value = '';
     isEnd = false;
     timer = setInterval(() => {
